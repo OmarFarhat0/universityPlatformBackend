@@ -10,9 +10,7 @@ const getCourses = async (req, res) => {
   try {
     const courses = await Course.find({
       professor: req.user._id,
-    })
-      .populate("students", "firstName lastName email")
-      .populate("department", "name");
+    }).populate("department", "name");
 
     res.json(courses);
   } catch (error) {
@@ -101,11 +99,15 @@ const deleteLecture = async (req, res) => {
         .json({ error: "Course not found or unauthorized" });
     }
 
-    course.lectures.id(lectureId).remove();
+    course.lectures = course.lectures.filter((lecture) => {
+      return String(lecture._id) !== lectureId;
+    });
+
     await course.save();
 
     res.json({ message: "Lecture deleted successfully" });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -233,7 +235,7 @@ const getExamGrades = async (req, res) => {
 
     // Get all attempts for the exam and populate user details
     const attempts = await ExamAttempt.find({ exam: examId })
-      .populate("user", "firstName lastName email") // Include user details
+      .populate("user", "firstName lastName username") // Include user details
       .populate("exam", "title totalPoints") // Include exam details
       .sort({ totalScore: -1 }); // Sort by score descending
 

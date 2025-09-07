@@ -22,12 +22,14 @@ const seedUsers = async () => {
     {
       firstName: "Admin",
       lastName: "User",
+      username: "Admin.User",
       password: hashedPassword,
       role: "admin",
     },
     {
       firstName: "John",
       lastName: "Professor",
+      username: "John.Professor",
       password: hashedPassword,
       role: "professor",
       department: department._id,
@@ -35,6 +37,7 @@ const seedUsers = async () => {
     {
       firstName: "Jane",
       lastName: "Student",
+      username: "Jane.Student",
       password: hashedPassword,
       role: "student",
       department: department._id,

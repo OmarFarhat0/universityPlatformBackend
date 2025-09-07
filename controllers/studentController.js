@@ -9,7 +9,8 @@ const path = require("path");
 const getEnrolledCourses = async (req, res) => {
   try {
     const courses = await Course.find({
-      students: req.user._id,
+      department: req.user.department,
+      year: req.user.year,
     })
       .populate("professor", "firstName lastName username")
       .populate("department", "name")
@@ -28,7 +29,6 @@ const getCourseLectures = async (req, res) => {
 
     const course = await Course.findOne({
       _id: courseId,
-      students: req.user._id,
     });
 
     if (!course) {
@@ -51,7 +51,6 @@ const getCourseExams = async (req, res) => {
 
     const course = await Course.findOne({
       _id: courseId,
-      students: { $in: [studentId] },
     });
 
     if (!course) {
@@ -111,11 +110,6 @@ const submitExamAttempt = async (req, res) => {
     const now = new Date();
     if (now < exam.startDate || now > exam.endDate) {
       return res.status(400).json({ error: "Exam is not currently active" });
-    }
-
-    // Check enrollment
-    if (!exam.course.students.includes(userId)) {
-      return res.status(403).json({ error: "Not enrolled in this course" });
     }
 
     //  Check existing attempt
@@ -238,7 +232,6 @@ const getCourseAssignments = async (req, res) => {
 
     const course = await Course.findOne({
       _id: courseId,
-      students: { $in: [req.user._id] },
     });
 
     if (!course) {
@@ -273,11 +266,6 @@ const submitAssignment = async (req, res) => {
     );
     if (!assignment) {
       return res.status(404).json({ error: "Assignment not found" });
-    }
-
-    // Check if student is enrolled in the course
-    if (!assignment.course.students.includes(req.user._id)) {
-      return res.status(403).json({ error: "Not enrolled in this course" });
     }
 
     // Check if assignment is still accepting submissions

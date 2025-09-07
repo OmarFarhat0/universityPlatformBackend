@@ -10,13 +10,6 @@ const autoEnrollUser = async (user) => {
       department: user.department,
       year: user.year,
     });
-
-    for (const course of matchingCourses) {
-      if (!course.students.includes(user._id)) {
-        course.students.push(user._id);
-        await course.save();
-      }
-    }
   }
 };
 
@@ -153,7 +146,6 @@ const getCourses = async (req, res) => {
     const courses = await Course.find()
       .populate("professor", "firstName lastName")
       .populate("department", "name")
-      .populate("students", "firstName lastName username")
       .sort({ createdAt: -1 });
     res.json(courses);
   } catch (error) {
@@ -181,17 +173,11 @@ const createCourse = async (req, res) => {
       year: year,
     });
 
-    for (const student of matchingStudents) {
-      if (!course.students.includes(student._id)) {
-        course.students.push(student._id);
-      }
-    }
     await course.save();
 
     const populatedCourse = await Course.findById(course._id)
       .populate("professor", "firstName lastName")
-      .populate("department", "name")
-      .populate("students", "firstName lastName username");
+      .populate("department", "name");
 
     res.status(201).json(populatedCourse);
   } catch (error) {
@@ -211,8 +197,7 @@ const updateCourse = async (req, res) => {
       { new: true }
     )
       .populate("professor", "firstName lastName")
-      .populate("department", "name")
-      .populate("students", "firstName lastName username");
+      .populate("department", "name");
 
     if (!course) {
       return res.status(404).json({ error: "Course not found" });
